@@ -1,37 +1,59 @@
 import streamlit as st
 
 # ======================================
-# PAGE SETTINGS
+# PAGE CONFIG
 # ======================================
 
 st.set_page_config(
-    page_title="EcoBin AI Assistant",
+    page_title="EcoBin GPT",
     page_icon="♻️",
-    layout="centered"
+    layout="wide"
 )
 
 # ======================================
-# CUSTOM STYLE
+# CUSTOM CSS
 # ======================================
 
 st.markdown("""
 <style>
 
 .stApp {
-    background-color: #0f172a;
+    background-color: #343541;
     color: white;
 }
 
-h1, h2, h3 {
-    color: #22c55e;
-    text-align: center;
+.chat-container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.user-message {
+    background-color: #0b93f6;
+    padding: 12px;
+    border-radius: 15px;
+    margin: 10px 0;
+    color: white;
+    text-align: right;
+}
+
+.bot-message {
+    background-color: #444654;
+    padding: 12px;
+    border-radius: 15px;
+    margin: 10px 0;
+    color: white;
+}
+
+.stTextInput input {
+    background-color: #40414f;
+    color: white;
+    border-radius: 10px;
 }
 
 .stButton button {
-    background-color: #22c55e;
+    background-color: #19c37d;
     color: white;
     border-radius: 10px;
-    border: none;
     width: 100%;
 }
 
@@ -42,97 +64,141 @@ h1, h2, h3 {
 # TITLE
 # ======================================
 
-st.title("♻️ EcoBin AI Assistant")
-st.subheader("Smart Waste Management Chatbot + AI Image Generator")
+st.title("♻️ EcoBin GPT")
+st.caption("Smart Waste Management Assistant")
+
+# ======================================
+# SESSION STATE
+# ======================================
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 # ======================================
 # USER INPUT
 # ======================================
 
-user_input = st.text_input(
-    "Ask about waste management"
+user_input = st.chat_input(
+    "Ask EcoBin anything about waste management..."
 )
 
 # ======================================
-# PROCESS
+# PROCESS USER INPUT
 # ======================================
 
-if st.button("Send"):
+if user_input:
 
-    if user_input.strip() == "":
-        st.warning("Please enter a message")
+    # Save user message
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": user_input
+        }
+    )
+
+    message = user_input.lower()
+
+    # ======================================
+    # BOT RESPONSES
+    # ======================================
+
+    if "hello" in message or "hi" in message:
+        bot_response = "Hello! Welcome to EcoBin GPT."
+        image_prompt = "eco friendly smart waste management"
+
+    elif "plastic" in message:
+        bot_response = (
+            "Plastic waste should go into the recyclable bin."
+        )
+        image_prompt = "plastic recycling bin"
+
+    elif "paper" in message:
+        bot_response = (
+            "Paper waste is recyclable if it is clean and dry."
+        )
+        image_prompt = "paper recycling waste"
+
+    elif "glass" in message:
+        bot_response = (
+            "Glass bottles and jars can be recycled safely."
+        )
+        image_prompt = "glass bottle recycling"
+
+    elif "metal" in message:
+        bot_response = (
+            "Metal cans are recyclable and reusable."
+        )
+        image_prompt = "metal waste recycling"
+
+    elif "organic" in message or "food" in message:
+        bot_response = (
+            "Organic waste can be composted into fertilizer."
+        )
+        image_prompt = "organic compost waste"
+
+    elif "recycle" in message:
+        bot_response = (
+            "Recycling helps reduce pollution and save resources."
+        )
+        image_prompt = "green recycling environment"
+
+    elif "smart bin" in message:
+        bot_response = (
+            "Smart bins use sensors and AI to monitor waste levels."
+        )
+        image_prompt = "smart ai trash bin"
+
+    elif "benefits" in message:
+        bot_response = (
+            "EcoBin improves waste segregation and cleanliness."
+        )
+        image_prompt = "clean green smart city"
+
+    elif "bye" in message:
+        bot_response = (
+            "Goodbye! Keep the environment clean and green."
+        )
+        image_prompt = "green earth environment"
+
+    else:
+        bot_response = (
+            "Sorry, I do not understand that yet."
+        )
+        image_prompt = "waste management"
+
+    # Save bot message
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": bot_response,
+            "image": image_prompt
+        }
+    )
+
+# ======================================
+# DISPLAY CHAT HISTORY
+# ======================================
+
+for msg in st.session_state.messages:
+
+    if msg["role"] == "user":
+
+        with st.chat_message("user"):
+            st.markdown(msg["content"])
 
     else:
 
-        message = user_input.lower()
+        with st.chat_message("assistant"):
 
-        # ======================================
-        # CHATBOT RESPONSES
-        # ======================================
+            st.markdown(msg["content"])
 
-        if "hello" in message or "hi" in message:
-            response = "Hello! Welcome to EcoBin AI Assistant."
-            image_prompt = "eco friendly smart waste management"
-
-        elif "plastic" in message:
-            response = "Plastic waste should go into the recyclable bin."
-            image_prompt = "plastic waste recycling bin"
-
-        elif "paper" in message:
-            response = "Paper waste is recyclable if it is clean and dry."
-            image_prompt = "paper recycling waste"
-
-        elif "glass" in message:
-            response = "Glass bottles and jars can be recycled safely."
-            image_prompt = "glass bottle recycling"
-
-        elif "metal" in message:
-            response = "Metal cans are recyclable and reusable."
-            image_prompt = "metal waste recycling"
-
-        elif "organic" in message or "food" in message:
-            response = "Organic waste can be composted into fertilizer."
-            image_prompt = "organic compost waste"
-
-        elif "recycle" in message:
-            response = "Recycling helps reduce pollution and save resources."
-            image_prompt = "recycling environment"
-
-        elif "smart bin" in message:
-            response = "Smart bins use sensors and AI to monitor waste levels."
-            image_prompt = "smart ai trash bin"
-
-        elif "benefits" in message:
-            response = "EcoBin improves waste segregation and cleanliness."
-            image_prompt = "clean green environment"
-
-        elif "bye" in message:
-            response = "Goodbye! Keep the environment clean and green."
-            image_prompt = "green earth clean environment"
-
-        else:
-            response = "Sorry, I do not understand that yet."
-            image_prompt = "waste management"
-
-        # ======================================
-        # DISPLAY CHATBOT RESPONSE
-        # ======================================
-
-        st.success(response)
-
-        # ======================================
-        # GENERATE AI IMAGE
-        # ======================================
-
-        with st.spinner("Generating AI image..."):
-
+            # Generate AI image
             image_url = (
-                f"https://image.pollinations.ai/prompt/{image_prompt}"
+                f"https://image.pollinations.ai/prompt/{msg['image']}"
             )
 
             st.image(
                 image_url,
-                caption="EcoBin AI Generated Image",
                 use_container_width=True
             )
 
@@ -141,20 +207,29 @@ if st.button("Send"):
             )
 
 # ======================================
-# ECO TIPS
+# SIDEBAR
 # ======================================
 
-st.divider()
+with st.sidebar:
 
-st.header("🌱 Eco Tips")
+    st.header("🌱 Eco Tips")
 
-tips = [
-    "Use reusable bags instead of plastic bags.",
-    "Segregate biodegradable and recyclable waste.",
-    "Reduce single-use plastics.",
-    "Recycle paper, glass, and metal properly.",
-    "Compost food waste whenever possible."
-]
+    st.success(
+        "Segregate biodegradable and recyclable waste."
+    )
 
-for tip in tips:
-    st.info(tip)
+    st.success(
+        "Reduce single-use plastics."
+    )
+
+    st.success(
+        "Recycle paper, glass, and metal properly."
+    )
+
+    st.success(
+        "Compost food waste whenever possible."
+    )
+
+    if st.button("Clear Chat"):
+        st.session_state.messages = []
+        st.rerun()
