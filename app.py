@@ -35,10 +35,6 @@ h1, h2, h3 {
     width: 100%;
 }
 
-.stTextInput input {
-    border-radius: 10px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -47,133 +43,118 @@ h1, h2, h3 {
 # ======================================
 
 st.title("♻️ EcoBin AI Assistant")
-st.subheader("Smart Waste Management System")
+st.subheader("Smart Waste Management Chatbot + AI Image Generator")
 
 # ======================================
-# SIDEBAR
+# USER INPUT
 # ======================================
 
-st.sidebar.title("EcoBin Menu")
-
-option = st.sidebar.selectbox(
-    "Choose Feature",
-    [
-        "EcoBin Chatbot",
-        "Waste Image Generator",
-        "Eco Tips"
-    ]
+user_input = st.text_input(
+    "Ask about waste management"
 )
 
 # ======================================
-# CHATBOT
+# PROCESS
 # ======================================
 
-if option == "EcoBin Chatbot":
+if st.button("Send"):
 
-    st.header("💬 EcoBin Chatbot")
+    if user_input.strip() == "":
+        st.warning("Please enter a message")
 
-    user_input = st.text_input(
-        "Ask about waste management"
-    )
+    else:
 
-    if st.button("Send"):
+        message = user_input.lower()
 
-        if user_input.strip() == "":
-            st.warning("Please enter a message")
+        # ======================================
+        # CHATBOT RESPONSES
+        # ======================================
+
+        if "hello" in message or "hi" in message:
+            response = "Hello! Welcome to EcoBin AI Assistant."
+            image_prompt = "eco friendly smart waste management"
+
+        elif "plastic" in message:
+            response = "Plastic waste should go into the recyclable bin."
+            image_prompt = "plastic waste recycling bin"
+
+        elif "paper" in message:
+            response = "Paper waste is recyclable if it is clean and dry."
+            image_prompt = "paper recycling waste"
+
+        elif "glass" in message:
+            response = "Glass bottles and jars can be recycled safely."
+            image_prompt = "glass bottle recycling"
+
+        elif "metal" in message:
+            response = "Metal cans are recyclable and reusable."
+            image_prompt = "metal waste recycling"
+
+        elif "organic" in message or "food" in message:
+            response = "Organic waste can be composted into fertilizer."
+            image_prompt = "organic compost waste"
+
+        elif "recycle" in message:
+            response = "Recycling helps reduce pollution and save resources."
+            image_prompt = "recycling environment"
+
+        elif "smart bin" in message:
+            response = "Smart bins use sensors and AI to monitor waste levels."
+            image_prompt = "smart ai trash bin"
+
+        elif "benefits" in message:
+            response = "EcoBin improves waste segregation and cleanliness."
+            image_prompt = "clean green environment"
+
+        elif "bye" in message:
+            response = "Goodbye! Keep the environment clean and green."
+            image_prompt = "green earth clean environment"
 
         else:
+            response = "Sorry, I do not understand that yet."
+            image_prompt = "waste management"
 
-            message = user_input.lower()
+        # ======================================
+        # DISPLAY CHATBOT RESPONSE
+        # ======================================
 
-            # NLP chatbot responses
+        st.success(response)
 
-            if "hello" in message or "hi" in message:
-                response = "Hello! Welcome to EcoBin AI Assistant."
+        # ======================================
+        # GENERATE AI IMAGE
+        # ======================================
 
-            elif "plastic" in message:
-                response = "Plastic waste should go into the recyclable bin."
+        with st.spinner("Generating AI image..."):
 
-            elif "paper" in message:
-                response = "Paper waste is recyclable if it is clean and dry."
+            image_url = (
+                f"https://image.pollinations.ai/prompt/{image_prompt}"
+            )
 
-            elif "glass" in message:
-                response = "Glass bottles and jars can be recycled safely."
+            st.image(
+                image_url,
+                caption="EcoBin AI Generated Image",
+                use_container_width=True
+            )
 
-            elif "metal" in message:
-                response = "Metal cans are recyclable and reusable."
-
-            elif "organic" in message or "food" in message:
-                response = "Organic waste can be composted into fertilizer."
-
-            elif "recycle" in message:
-                response = "Recycling helps reduce pollution and save resources."
-
-            elif "smart bin" in message:
-                response = "Smart bins use sensors and AI to monitor waste levels."
-
-            elif "benefits" in message:
-                response = "EcoBin improves waste segregation and cleanliness."
-
-            elif "bye" in message:
-                response = "Goodbye! Keep the environment clean and green."
-
-            else:
-                response = "Sorry, I do not understand that yet."
-
-            st.success(response)
-
-# ======================================
-# IMAGE GENERATOR
-# ======================================
-
-elif option == "Waste Image Generator":
-
-    st.header("🎨 Waste Image Generator")
-
-    prompt = st.text_input(
-        "Describe waste image"
-    )
-
-    if st.button("Generate Image"):
-
-        if prompt.strip() == "":
-            st.warning("Please enter a prompt")
-
-        else:
-
-            with st.spinner("Generating image..."):
-
-                image_url = (
-                    f"https://image.pollinations.ai/prompt/{prompt}"
-                )
-
-                st.image(
-                    image_url,
-                    caption="Generated Waste Image",
-                    use_container_width=True
-                )
-
-                st.markdown(
-                    f"[Download Image]({image_url})"
-                )
+            st.markdown(
+                f"[Download Image]({image_url})"
+            )
 
 # ======================================
 # ECO TIPS
 # ======================================
 
-elif option == "Eco Tips":
+st.divider()
 
-    st.header("🌱 Eco Tips")
+st.header("🌱 Eco Tips")
 
-    tips = [
-        "Use reusable bags instead of plastic bags.",
-        "Segregate biodegradable and recyclable waste.",
-        "Turn off lights when not in use.",
-        "Reuse bottles and containers whenever possible.",
-        "Compost food waste to reduce garbage.",
-        "Reduce single-use plastics.",
-        "Recycle paper, glass, and metal properly."
-    ]
+tips = [
+    "Use reusable bags instead of plastic bags.",
+    "Segregate biodegradable and recyclable waste.",
+    "Reduce single-use plastics.",
+    "Recycle paper, glass, and metal properly.",
+    "Compost food waste whenever possible."
+]
 
-    for tip in tips:
-        st.success(tip)
+for tip in tips:
+    st.info(tip)
