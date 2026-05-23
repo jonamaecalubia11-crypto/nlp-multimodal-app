@@ -3,7 +3,6 @@ import requests
 from requests.exceptions import ConnectionError, Timeout
 from PIL import Image
 from io import BytesIO
-import os
 
 # ======================================
 # PAGE SETTINGS
@@ -14,22 +13,14 @@ st.title("🤖 NLP Multi-Modal AI App")
 st.subheader("Chatbot + AI Image Generator")
 
 # ======================================
-# DIAGNOSTIC STORAGE & SSL FIX
+# API SETTINGS
 # ======================================
-# Bypasses underlying SSL/certificate bundle routing issues inside cloud containers
-os.environ['CURL_CA_BUNDLE'] = '' 
 
-# Safely checking Streamlit secrets
-try:
-    if isinstance(st.secrets.get("HF_TOKEN"), dict):
-        API_TOKEN = st.secrets["HF_TOKEN"]["token"]
-    else:
-        API_TOKEN = st.secrets.get("HF_TOKEN")
-except Exception:
-    API_TOKEN = None
-
-# Fallback token directly if secrets dashboard is empty
-if not API_TOKEN:
+# Safe secret loading. Looks for HF_TOKEN inside your Streamlit Cloud Advanced Settings Secrets panel.
+if "API_TOKEN" in st.secrets:
+    API_TOKEN = st.secrets["HF_TOKEN"]
+else:
+    # Fallback to the hardcoded token if the Secrets dashboard hasn't been set up yet
     API_TOKEN = "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"
 
 headers = {
@@ -75,6 +66,8 @@ if option == "Chatbot":
 
                     if response.status_code == 200:
                         result = response.json()
+                        
+                        # Handle varied dictionary response structures from Hugging Face
                         if isinstance(result, list) and len(result) > 0:
                             st.success(result[0].get("generated_text", ""))
                         elif isinstance(result, dict) and "generated_text" in result:
@@ -90,7 +83,8 @@ if option == "Chatbot":
                             st.write(response.text)
 
                 except ConnectionError as ce:
-                    st.error(f"Connection failed diagnostic error: {ce}")
+                    st.error(f"Network Connection Error: {ce}")
+                    st.info("💡 If you see 'Name or service not known', please delete and re-deploy this app on Streamlit Cloud to clear the broken server route.")
 
                 except Timeout:
                     st.error("Request timed out.")
@@ -139,7 +133,8 @@ if option == "Image Generator":
                             st.write(response.text)
 
                 except ConnectionError as ce:
-                    st.error(f"Connection failed diagnostic error: {ce}")
+                    st.error(f"Network Connection Error: {ce}")
+                    st.info("💡 If you see 'Name or service not known', please delete and re-deploy this app on Streamlit Cloud to clear the broken server route.")
 
                 except Timeout:
                     st.error("Request timed out.")
