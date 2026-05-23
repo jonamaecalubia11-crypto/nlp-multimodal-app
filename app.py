@@ -3,30 +3,41 @@ import requests
 from PIL import Image
 from io import BytesIO
 
-# Hugging Face API Token
-API_TOKEN = "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"
+# ======================================
+# PAGE SETTINGS
+# ======================================
 
-# Models
-CHAT_API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"
-IMAGE_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
+st.set_page_config(page_title="NLP Multi-Modal AI App")
+
+st.title("🤖 NLP Multi-Modal AI App")
+st.subheader("Chatbot + AI Image Generator")
+
+# ======================================
+# API SETTINGS
+# ======================================
+
+API_TOKEN = st.secrets["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"]
 
 headers = {
     "Authorization": f"Bearer {API_TOKEN}"
 }
 
-# ---------------- APP UI ----------------
+CHAT_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
 
-st.title("🤖 NLP Multi-Modal AI App")
-st.subheader("Chatbot + Image Generator")
+IMAGE_API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+
+# ======================================
+# SIDEBAR
+# ======================================
 
 option = st.sidebar.selectbox(
     "Choose Feature",
     ["Chatbot", "Image Generator"]
 )
 
-# =========================================
+# ======================================
 # CHATBOT
-# =========================================
+# ======================================
 
 if option == "Chatbot":
 
@@ -87,11 +98,11 @@ if option == "Chatbot":
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-# =========================================
+# ======================================
 # IMAGE GENERATOR
-# =========================================
+# ======================================
 
-elif option == "Image Generator":
+if option == "Image Generator":
 
     st.header("🎨 AI Image Generator")
 
@@ -148,5 +159,3 @@ elif option == "Image Generator":
 
                 except Exception as e:
                     st.error(f"Error: {e}")
-        else:
-            st.error("Image generation failed")
