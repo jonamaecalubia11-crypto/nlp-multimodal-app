@@ -16,11 +16,11 @@ st.subheader("Chatbot + AI Image Generator")
 # API SETTINGS
 # ======================================
 
-# Safe secret loading. Looks for HF_TOKEN inside your Streamlit Cloud Advanced Settings Secrets panel.
+# Look for HF_TOKEN inside your Streamlit Cloud Advanced Settings Secrets panel
 if "API_TOKEN" in st.secrets:
     API_TOKEN = st.secrets["API_TOKEN"]
 else:
-    # Fallback to the hardcoded token if the Secrets dashboard hasn't been set up yet
+    # Safe fallback to avoid KeyError crashes if Secrets aren't saved yet
     API_TOKEN = "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"
 
 headers = {
@@ -67,7 +67,7 @@ if option == "Chatbot":
                     if response.status_code == 200:
                         result = response.json()
                         
-                        # Handle varied dictionary response structures from Hugging Face
+                        # Support multiple Hugging Face dictionary variations
                         if isinstance(result, list) and len(result) > 0:
                             st.success(result[0].get("generated_text", ""))
                         elif isinstance(result, dict) and "generated_text" in result:
@@ -84,7 +84,7 @@ if option == "Chatbot":
 
                 except ConnectionError as ce:
                     st.error(f"Network Connection Error: {ce}")
-                    st.info("💡 If you see 'Name or service not known', please delete and re-deploy this app on Streamlit Cloud to clear the broken server route.")
+                    st.info("💡 If you see 'Name or service not known', deleting and redeploying the app on Streamlit Cloud resolves this infrastructure glitch.")
 
                 except Timeout:
                     st.error("Request timed out.")
@@ -134,7 +134,7 @@ if option == "Image Generator":
 
                 except ConnectionError as ce:
                     st.error(f"Network Connection Error: {ce}")
-                    st.info("💡 If you see 'Name or service not known', please delete and re-deploy this app on Streamlit Cloud to clear the broken server route.")
+                    st.info("💡 If you see 'Name or service not known', deleting and redeploying the app on Streamlit Cloud resolves this infrastructure glitch.")
 
                 except Timeout:
                     st.error("Request timed out.")
