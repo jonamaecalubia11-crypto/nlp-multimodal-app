@@ -1,235 +1,162 @@
 import streamlit as st
+import requests
+from requests.exceptions import ConnectionError, Timeout  # Fixed missing exception imports
+from PIL import Image
+from io import BytesIO
 
 # ======================================
-# PAGE CONFIG
+# PAGE SETTINGS
 # ======================================
 
-st.set_page_config(
-    page_title="EcoBin GPT",
-    page_icon="♻️",
-    layout="wide"
-)
+st.set_page_config(page_title="NLP Multi-Modal AI App")
+
+st.title("🤖 NLP Multi-Modal AI App")
 
 # ======================================
-# CUSTOM CSS
+# API SETTINGS
 # ======================================
 
-st.markdown("""
-<style>
+# SAFE: Looks up the variable name from your secrets.toml file
+API_TOKEN = st.secrets["API_TOKEN"]
 
-.stApp {
-    background-color: #343541;
-    color: white;
+headers = {
+    "Authorization": f"Bearer {API_TOKEN}"
 }
 
-.chat-container {
-    max-width: 900px;
-    margin: auto;
-}
-
-.user-message {
-    background-color: #0b93f6;
-    padding: 12px;
-    border-radius: 15px;
-    margin: 10px 0;
-    color: white;
-    text-align: right;
-}
-
-.bot-message {
-    background-color: #444654;
-    padding: 12px;
-    border-radius: 15px;
-    margin: 10px 0;
-    color: white;
-}
-
-.stTextInput input {
-    background-color: #40414f;
-    color: white;
-    border-radius: 10px;
-}
-
-.stButton button {
-    background-color: #19c37d;
-    color: white;
-    border-radius: 10px;
-    width: 100%;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# ======================================
-# TITLE
-# ======================================
-
-st.title("♻️ EcoBin GPT")
-st.caption("Smart Waste Management Assistant")
-
-# ======================================
-# SESSION STATE
-# ======================================
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# ======================================
-# USER INPUT
-# ======================================
-
-user_input = st.chat_input(
-    "Ask EcoBin anything about waste management..."
-)
-
-# ======================================
-# PROCESS USER INPUT
-# ======================================
-
-if user_input:
-
-    # Save user message
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": user_input
-        }
-    )
-
-    message = user_input.lower()
-
-    # ======================================
-    # BOT RESPONSES
-    # ======================================
-
-    if "hello" in message or "hi" in message:
-        bot_response = "Hello! Welcome to EcoBin GPT."
-        image_prompt = "eco friendly smart waste management"
-
-    elif "plastic" in message:
-        bot_response = (
-            "Plastic waste should go into the recyclable bin."
-        )
-        image_prompt = "plastic recycling bin"
-
-    elif "paper" in message:
-        bot_response = (
-            "Paper waste is recyclable if it is clean and dry."
-        )
-        image_prompt = "paper recycling waste"
-
-    elif "glass" in message:
-        bot_response = (
-            "Glass bottles and jars can be recycled safely."
-        )
-        image_prompt = "glass bottle recycling"
-
-    elif "metal" in message:
-        bot_response = (
-            "Metal cans are recyclable and reusable."
-        )
-        image_prompt = "metal waste recycling"
-
-    elif "organic" in message or "food" in message:
-        bot_response = (
-            "Organic waste can be composted into fertilizer."
-        )
-        image_prompt = "organic compost waste"
-
-    elif "recycle" in message:
-        bot_response = (
-            "Recycling helps reduce pollution and save resources."
-        )
-        image_prompt = "green recycling environment"
-
-    elif "smart bin" in message:
-        bot_response = (
-            "Smart bins use sensors and AI to monitor waste levels."
-        )
-        image_prompt = "smart ai trash bin"
-
-    elif "benefits" in message:
-        bot_response = (
-            "EcoBin improves waste segregation and cleanliness."
-        )
-        image_prompt = "clean green smart city"
-
-    elif "bye" in message:
-        bot_response = (
-            "Goodbye! Keep the environment clean and green."
-        )
-        image_prompt = "green earth environment"
-
-    else:
-        bot_response = (
-            "Sorry, I do not understand that yet."
-        )
-        image_prompt = "waste management"
-
-    # Save bot message
-    st.session_state.messages.append(
-        {
-            "role": "assistant",
-            "content": bot_response,
-            "image": image_prompt
-        }
-    )
-
-# ======================================
-# DISPLAY CHAT HISTORY
-# ======================================
-
-for msg in st.session_state.messages:
-
-    if msg["role"] == "user":
-
-        with st.chat_message("user"):
-            st.markdown(msg["content"])
-
-    else:
-
-        with st.chat_message("assistant"):
-
-            st.markdown(msg["content"])
-
-            # Generate AI image
-            image_url = (
-                f"https://image.pollinations.ai/prompt/{msg['image']}"
-            )
-
-            st.image(
-                image_url,
-                use_container_width=True
-            )
-
-            st.markdown(
-                f"[Download Image]({image_url})"
-            )
+CHAT_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
+IMAGE_API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
 
 # ======================================
 # SIDEBAR
 # ======================================
 
-with st.sidebar:
+option = st.sidebar.selectbox(
+    "Choose Feature",
+    ["Chatbot", "Image Generator"]
+)
 
-    st.header("🌱 Eco Tips")
+# ======================================
+# CHATBOT
+# ======================================
 
-    st.success(
-        "Segregate biodegradable and recyclable waste."
-    )
+if option == "Chatbot":
 
-    st.success(
-        "Reduce single-use plastics."
-    )
+    st.header("💬 AI Chatbot")
 
-    st.success(
-        "Recycle paper, glass, and metal properly."
-    )
+    user_input = st.text_input("Enter your message")
 
-    st.success(
-        "Compost food waste whenever possible."
-    )
+    if st.button("Send"):
 
-    if st.button("Clear Chat"):
-        st.session_state.messages = []
-        st.rerun()
+        if user_input.strip() == "":
+            st.warning("Please enter a message")
+
+        else:
+
+            with st.spinner("Thinking..."):
+
+                payload = {
+                    "inputs": user_input,
+                    "parameters": {"max_new_tokens": 100}  # Helps FLAN-T5 generate better responses
+                }
+
+                try:
+
+                    response = requests.post(
+                        CHAT_API_URL,
+                        headers=headers,
+                        json=payload,
+                        timeout=60
+                    )
+
+                    if response.status_code == 200:
+
+                        result = response.json()
+
+                        # Properly parsing Hugging Face's return list format
+                        if isinstance(result, list) and len(result) > 0:
+                            generated_text = result[0].get("generated_text", "")
+                            st.success(generated_text)
+                        elif isinstance(result, dict) and "generated_text" in result:
+                            st.success(result["generated_text"])
+                        else:
+                            st.write(result)
+
+                    else:
+
+                        st.error("Chatbot request failed")
+                        st.write("Status Code:", response.status_code)
+
+                        try:
+                            st.json(response.json())
+                        except:
+                            st.write(response.text)
+
+                except ConnectionError:
+                    st.error("Connection failed.")
+
+                except Timeout:
+                    st.error("Request timed out.")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+# ======================================
+# IMAGE GENERATOR
+# ======================================
+
+if option == "Image Generator":
+
+    st.header("🎨 AI Image Generator")
+
+    prompt = st.text_input("Describe your image")
+
+    if st.button("Generate Image"):
+
+        if prompt.strip() == "":
+            st.warning("Please enter a prompt")
+
+        else:
+
+            with st.spinner("Generating image..."):
+
+                payload = {
+                    "inputs": prompt
+                }
+
+                try:
+
+                    response = requests.post(
+                        IMAGE_API_URL,
+                        headers=headers,
+                        json=payload,
+                        timeout=120
+                    )
+
+                    if response.status_code == 200:
+
+                        image = Image.open(BytesIO(response.content))
+
+                        st.image(
+                            image,
+                            caption="Generated Image",
+                            use_container_width=True
+                        )
+
+                    else:
+
+                        st.error("Image generation failed")
+                        st.write("Status Code:", response.status_code)
+
+                        try:
+                            st.json(response.json())
+                        except:
+                            st.write(response.text)
+
+                except ConnectionError:
+                    st.error("Connection failed.")
+
+                except Timeout:
+                    st.error("Request timed out.")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
