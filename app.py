@@ -7,10 +7,9 @@ from io import BytesIO
 # ======================================
 # PAGE CONFIGURATION & LAYOUT
 # ======================================
-st.set_page_config(page_title="Gemini-Style AI Assistant", layout="centered")
+st.set_page_config(page_title="MONA AI", layout="centered")
 
-st.title("✨ Gemini-Style AI Assistant")
-st.subheader("Chatbot and Image Generation in one timeline")
+st.title("✨ MONA")
 
 # ======================================
 # SECRETS CONFIGURATION
