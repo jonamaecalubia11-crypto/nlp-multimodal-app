@@ -24,9 +24,9 @@ option = st.sidebar.selectbox(
     ["Chatbot", "Image Generator"]
 )
 
-# =====================================================
+# =========================================
 # CHATBOT
-# =====================================================
+# =========================================
 
 if option == "Chatbot":
 
@@ -60,7 +60,6 @@ if option == "Chatbot":
 
                         result = response.json()
 
-                        # FLAN-T5 output
                         if isinstance(result, list):
                             generated_text = result[0]["generated_text"]
                             st.success(generated_text)
@@ -71,16 +70,16 @@ if option == "Chatbot":
                     else:
 
                         st.error("Chatbot request failed")
-
                         st.write("Status Code:", response.status_code)
 
                         try:
                             st.json(response.json())
+
                         except:
                             st.write(response.text)
 
                 except requests.exceptions.ConnectionError:
-                    st.error("Connection failed. Check internet/API.")
+                    st.error("Connection failed.")
 
                 except requests.exceptions.Timeout:
                     st.error("Request timed out.")
@@ -88,11 +87,11 @@ if option == "Chatbot":
                 except Exception as e:
                     st.error(f"Error: {e}")
 
-# =====================================================
+# =========================================
 # IMAGE GENERATOR
-# =====================================================
+# =========================================
 
-if option == "Image Generator":
+elif option == "Image Generator":
 
     st.header("🎨 AI Image Generator")
 
@@ -133,11 +132,11 @@ if option == "Image Generator":
                     else:
 
                         st.error("Image generation failed")
-
                         st.write("Status Code:", response.status_code)
 
                         try:
                             st.json(response.json())
+
                         except:
                             st.write(response.text)
 
@@ -149,6 +148,5 @@ if option == "Image Generator":
 
                 except Exception as e:
                     st.error(f"Error: {e}")
-
         else:
             st.error("Image generation failed")
