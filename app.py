@@ -24,7 +24,6 @@ headers = {
 
 CHAT_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
 
-IMAGE_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
 
 # ======================================
 # SIDEBAR
@@ -102,7 +101,7 @@ if option == "Chatbot":
 # IMAGE GENERATOR
 # ======================================
 
-if option == "Image Generator":
+elif option == "Image Generator":
 
     st.header("🎨 AI Image Generator")
 
@@ -115,50 +114,16 @@ if option == "Image Generator":
 
         else:
 
-            with st.spinner("Generating image... Please wait..."):
+            with st.spinner("Generating image..."):
 
-                payload = {
-                    "inputs": prompt
-                }
+                image_url = f"https://image.pollinations.ai/prompt/{prompt}"
 
-                try:
+                st.image(
+                    image_url,
+                    caption="Generated Image",
+                    use_container_width=True
+                )
 
-                    response = requests.post(
-                        IMAGE_API_URL,
-                        headers=headers,
-                        json=payload,
-                        timeout=180
-                    )
-
-                    if response.status_code == 200:
-
-                        image = Image.open(BytesIO(response.content))
-
-                        st.image(
-                            image,
-                            caption="Generated Image",
-                            use_container_width=True
-                        )
-
-                    else:
-
-                        st.error("Image generation failed")
-
-                        st.write("Status:", response.status_code)
-
-                        try:
-                            st.json(response.json())
-                        except:
-                            st.write(response.text)
-
-                except requests.exceptions.Timeout:
-                    st.error("The model is busy. Try again.")
-
-                except requests.exceptions.ConnectionError:
-                    st.error("Cannot connect to Hugging Face servers.")
-
-                except Exception as e:
-                    st.error(f"Error: {e}")
-
-                except Exception as e:
-                    st.error(f"Error: {e}")
+                st.markdown(
+                    f"[Download Image]({image_url})"
+                )
