@@ -22,9 +22,6 @@ headers = {
     "Authorization": f"Bearer {API_TOKEN}"
 }
 
-CHAT_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
-
-
 # ======================================
 # SIDEBAR
 # ======================================
@@ -53,46 +50,17 @@ if option == "Chatbot":
 
             with st.spinner("Thinking..."):
 
-                payload = {
-                    "inputs": user_input
-                }
-
                 try:
 
-                    response = requests.post(
-                        CHAT_API_URL,
-                        headers=headers,
-                        json=payload,
-                        timeout=60
-                    )
+                    url = f"https://api.affiliateplus.xyz/api/chatbot?message={user_input}&botname=NLPBot&ownername=Jona"
 
-                    if response.status_code == 200:
+                    response = requests.get(url)
 
-                        result = response.json()
+                    data = response.json()
 
-                        if isinstance(result, list):
-                            generated_text = result[0]["generated_text"]
-                            st.success(generated_text)
+                    reply = data["message"]
 
-                        else:
-                            st.write(result)
-
-                    else:
-
-                        st.error("Chatbot request failed")
-                        st.write("Status Code:", response.status_code)
-
-                        try:
-                            st.json(response.json())
-
-                        except:
-                            st.write(response.text)
-
-                except requests.exceptions.ConnectionError:
-                    st.error("Connection failed.")
-
-                except requests.exceptions.Timeout:
-                    st.error("Request timed out.")
+                    st.success(reply)
 
                 except Exception as e:
                     st.error(f"Error: {e}")
