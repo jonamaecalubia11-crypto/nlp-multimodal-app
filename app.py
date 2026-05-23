@@ -10,7 +10,6 @@ from io import BytesIO
 st.set_page_config(page_title="NLP Multi-Modal AI App")
 
 st.title("🤖 NLP Multi-Modal AI App")
-st.subheader("Chatbot + AI Image Generator")
 
 # ======================================
 # API SETTINGS
@@ -48,22 +47,34 @@ if option == "Chatbot":
 
         else:
 
-            with st.spinner("Thinking..."):
+            message = user_input.lower()
 
-                try:
+            # Simple NLP chatbot responses
+            if "hello" in message or "hi" in message:
+                response = "Hello! How can I help you today?"
 
-                    url = f"https://api.affiliateplus.xyz/api/chatbot?message={user_input}&botname=NLPBot&ownername=Jona"
+            elif "how are you" in message:
+                response = "I'm doing great! Thanks for asking."
 
-                    response = requests.get(url)
+            elif "what is ai" in message:
+                response = "AI stands for Artificial Intelligence."
 
-                    data = response.json()
+            elif "your name" in message:
+                response = "I am your NLP Multi-Modal AI Assistant."
 
-                    reply = data["message"]
+            elif "bye" in message:
+                response = "Goodbye! Have a nice day."
 
-                    st.success(reply)
+            elif "python" in message:
+                response = "Python is a popular programming language for AI and NLP."
 
-                except Exception as e:
-                    st.error(f"Error: {e}")
+            elif "streamlit" in message:
+                response = "Streamlit is a Python framework for building web apps."
+
+            else:
+                response = "Sorry, I don't understand that yet."
+
+            st.success(response)
 
 # ======================================
 # IMAGE GENERATOR
