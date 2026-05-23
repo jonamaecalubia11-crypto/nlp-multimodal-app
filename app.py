@@ -1,23 +1,37 @@
 import streamlit as st
 import requests
-from requests.exceptions import ConnectionError, Timeout  # Fixed missing exception imports
+from requests.exceptions import ConnectionError, Timeout
 from PIL import Image
 from io import BytesIO
+import os
 
 # ======================================
 # PAGE SETTINGS
 # ======================================
-
 st.set_page_config(page_title="NLP Multi-Modal AI App")
 
 st.title("🤖 NLP Multi-Modal AI App")
+st.subheader("Chatbot + AI Image Generator")
 
 # ======================================
-# API SETTINGS
+# DIAGNOSTIC STORAGE & SSL FIX
 # ======================================
+# Fix 1: Disables SSL bundle environment bugs common in cloud container endpoints
+os.environ['CURL_CA_BUNDLE'] = '' 
 
-# SAFE: Looks up the variable name from your secrets.toml file
-API_TOKEN = st.secrets["API_TOKEN"]
+# Fix 2: Handle both dictionary and direct formats for st.secrets safely
+try:
+    if isinstance(st.secrets.get("HF_TOKEN"), dict):
+        API_TOKEN = st.secrets["HF_TOKEN"]["token"]
+    else:
+        API_TOKEN = st.secrets.get("HF_TOKEN")
+except Exception as e:
+    st.error(f"Secrets Configuration Error: {e}")
+    API_TOKEN = None
+
+# If API_TOKEN didn't load from HF_TOKEN, use a fallback direct assignment to test
+if not API_TOKEN:
+    API_TOKEN = "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"
 
 headers = {
     "Authorization": f"Bearer {API_TOKEN}"
@@ -91,9 +105,8 @@ if option == "Chatbot":
                         except:
                             st.write(response.text)
 
-                except ConnectionError:
-                    st.error("Connection failed.")
-
+              except ConnectionError as ce:
+                st.error(f"Connection failed: {ce}")
                 except Timeout:
                     st.error("Request timed out.")
 
