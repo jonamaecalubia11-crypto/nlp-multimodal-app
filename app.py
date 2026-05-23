@@ -24,7 +24,7 @@ headers = {
 
 CHAT_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
 
-IMAGE_API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+IMAGE_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
 
 # ======================================
 # SIDEBAR
@@ -115,7 +115,7 @@ if option == "Image Generator":
 
         else:
 
-            with st.spinner("Generating image..."):
+            with st.spinner("Generating image... Please wait..."):
 
                 payload = {
                     "inputs": prompt
@@ -127,7 +127,7 @@ if option == "Image Generator":
                         IMAGE_API_URL,
                         headers=headers,
                         json=payload,
-                        timeout=120
+                        timeout=180
                     )
 
                     if response.status_code == 200:
@@ -143,19 +143,22 @@ if option == "Image Generator":
                     else:
 
                         st.error("Image generation failed")
-                        st.write("Status Code:", response.status_code)
+
+                        st.write("Status:", response.status_code)
 
                         try:
                             st.json(response.json())
-
                         except:
                             st.write(response.text)
 
-                except requests.exceptions.ConnectionError:
-                    st.error("Connection failed.")
-
                 except requests.exceptions.Timeout:
-                    st.error("Request timed out.")
+                    st.error("The model is busy. Try again.")
+
+                except requests.exceptions.ConnectionError:
+                    st.error("Cannot connect to Hugging Face servers.")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
 
                 except Exception as e:
                     st.error(f"Error: {e}")
