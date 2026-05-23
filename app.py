@@ -15,12 +15,9 @@ st.subheader("Chatbot + AI Image Generator")
 # ======================================
 # INITIALIZE APIS
 # ======================================
-
-# Safely load Groq Key from secrets dashboard or use a temporary local variable
 if "GROQ_API_KEY" in st.secrets:
     groq_key = st.secrets["GROQ_API_KEY"]
 else:
-    # Fallback to empty string if not configured yet so the page layout loads smoothly
     groq_key = ""
 
 # ======================================
@@ -32,7 +29,7 @@ option = st.sidebar.selectbox(
 )
 
 # ======================================
-# CHATBOT (Powered by Groq & Llama 3.1)
+# 💬 CHATBOT FEATURE (ChatGPT Interface Style)
 # ======================================
 if option == "Chatbot":
 
@@ -41,20 +38,24 @@ if option == "Chatbot":
     if not groq_key:
         st.warning("⚠️ Please add your `GROQ_API_KEY` to your Streamlit Secrets panel to use the chatbot.")
     
-    user_input = st.text_input("Enter your message")
+    # Text input field for user prompts
+    user_input = st.text_input("Message Chatbot...", placeholder="Ask me anything...", key="chat_input")
 
-    if st.button("Send"):
+    if st.button("Send Message", use_container_width=True):
         if user_input.strip() == "":
-            st.warning("Please enter a message")
+            st.warning("Please enter a message first!")
         elif not groq_key:
-            st.error("Missing API Key.")
+            st.error("Missing API Key configuration.")
         else:
+            # 1. Render User Message Bubble
+            with st.chat_message("user"):
+                st.write(user_input)
+                
+            # 2. Compute and Render Assistant Message Bubble
             with st.spinner("Thinking..."):
                 try:
-                    # Initialize the Groq client
                     client = Groq(api_key=groq_key)
                     
-                    # Request generation from the active llama-3.1-8b-instant model
                     completion = client.chat.completions.create(
                         model="llama-3.1-8b-instant",
                         messages=[
@@ -64,31 +65,30 @@ if option == "Chatbot":
                         max_tokens=1024,
                     )
                     
-                    # Display response response block
                     response_text = completion.choices[0].message.content
-                    st.success(response_text)
+                    
+                    # Render sleek Chatbot Response Bubble
+                    with st.chat_message("assistant"):
+                        st.write(response_text)
 
                 except Exception as e:
-                    st.error(f"Chatbot failed: {e}")
+                    st.error(f"Chatbot failed to respond: {e}")
 
 # ======================================
-# IMAGE GENERATOR (Powered by Pollinations.ai)
+# 🎨 IMAGE GENERATOR FEATURE
 # ======================================
 if option == "Image Generator":
 
     st.header("🎨 AI Image Generator")
-    prompt = st.text_input("Describe your image")
+    prompt = st.text_input("Describe the image you want to create...")
 
-    if st.button("Generate Image"):
+    if st.button("Generate Image", use_container_width=True):
         if prompt.strip() == "":
-            st.warning("Please enter a prompt")
+            st.warning("Please enter a description prompt.")
         else:
             with st.spinner("Generating image..."):
                 try:
-                    # Clean the prompt string to make it safe for a URL endpoint
                     cleaned_prompt = requests.utils.quote(prompt)
-                    
-                    # Pollinations completely bypasses the need for an API key or bearer tokens!
                     image_url = f"https://image.pollinations.ai/p/{cleaned_prompt}?width=1024&height=1024&seed=42"
                     
                     response = requests.get(image_url, timeout=60)
@@ -97,13 +97,13 @@ if option == "Image Generator":
                         image = Image.open(BytesIO(response.content))
                         st.image(
                             image,
-                            caption=f"Generated Image: '{prompt}'",
+                            caption=f"Generated Layout: '{prompt}'",
                             use_container_width=True
                         )
                     else:
-                        st.error(f"Image generation failed with status code: {response.status_code}")
+                        st.error(f"Generation stopped. Status code: {response.status_code}")
 
                 except requests.exceptions.Timeout:
-                    st.error("The image generation request timed out. Please try again.")
+                    st.error("The network request timed out. Please try running it again.")
                 except Exception as e:
                     st.error(f"Error fetching image: {e}")
