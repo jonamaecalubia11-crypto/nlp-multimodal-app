@@ -32,7 +32,7 @@ option = st.sidebar.selectbox(
 )
 
 # ======================================
-# CHATBOT (Powered by Groq & Llama 3)
+# CHATBOT (Powered by Groq & Llama 3.1)
 # ======================================
 if option == "Chatbot":
 
@@ -54,9 +54,9 @@ if option == "Chatbot":
                     # Initialize the Groq client
                     client = Groq(api_key=groq_key)
                     
-                    # Request generation from llama3-8b model
+                    # Request generation from the active llama-3.1-8b-instant model
                     completion = client.chat.completions.create(
-                        model="llama3-8b-8192",
+                        model="llama-3.1-8b-instant",
                         messages=[
                             {"role": "user", "content": user_input}
                         ],
