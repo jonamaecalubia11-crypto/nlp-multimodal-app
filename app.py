@@ -29,7 +29,7 @@ if not groq_key:
 # This prevents your history from disappearing when you press buttons
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "type": "text", "content": "Hello! I am your Gemini-style assistant. Ask me a question, or tell me to generate an image!"}
+        {"role": "assistant", "type": "text", "content": "Hello! I am your MONA ai assistant. Ask me a question, or tell me to generate an image!"}
     ]
 
 # ======================================
