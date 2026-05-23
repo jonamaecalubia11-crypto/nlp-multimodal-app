@@ -3,30 +3,36 @@ import requests
 from PIL import Image
 from io import BytesIO
 
-# Hugging Face API Token
-API_TOKEN = "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"
+# ---------------- SETTINGS ----------------
 
-# Models
-CHAT_API_URL = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium"
-IMAGE_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2"
+st.set_page_config(page_title="NLP Multi-Modal AI App")
+
+# Hugging Face Token
+API_TOKEN = st.secrets["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"]
 
 headers = {
     "Authorization": f"Bearer {API_TOKEN}"
 }
 
-# Streamlit page
-st.set_page_config(page_title="NLP Multi-Modal AI App")
+# Models
+CHAT_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
+
+IMAGE_API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+
+# ---------------- APP UI ----------------
 
 st.title("🤖 NLP Multi-Modal AI App")
-st.subheader("Chat + AI Image Generator")
+st.subheader("Chatbot + Image Generator")
 
-# Sidebar
 option = st.sidebar.selectbox(
     "Choose Feature",
     ["Chatbot", "Image Generator"]
 )
 
-# ---------------- CHATBOT ----------------
+# =====================================================
+# CHATBOT
+# =====================================================
+
 if option == "Chatbot":
 
     st.header("💬 AI Chatbot")
@@ -35,24 +41,62 @@ if option == "Chatbot":
 
     if st.button("Send"):
 
-        payload = {
-            "inputs": user_input
-        }
+        if user_input.strip() == "":
+            st.warning("Please enter a message")
 
-        response = requests.post(
-            CHAT_API_URL,
-            headers=headers,
-            json=payload
-        )
+        else:
 
-        result = response.json()
+            with st.spinner("Thinking..."):
 
-        try:
-            st.success(result["generated_text"])
-        except:
-            st.error("Error generating response")
+                payload = {
+                    "inputs": user_input
+                }
 
-# ---------------- IMAGE GENERATOR ----------------
+                try:
+
+                    response = requests.post(
+                        CHAT_API_URL,
+                        headers=headers,
+                        json=payload,
+                        timeout=60
+                    )
+
+                    if response.status_code == 200:
+
+                        result = response.json()
+
+                        # FLAN-T5 output
+                        if isinstance(result, list):
+                            generated_text = result[0]["generated_text"]
+                            st.success(generated_text)
+
+                        else:
+                            st.write(result)
+
+                    else:
+
+                        st.error("Chatbot request failed")
+
+                        st.write("Status Code:", response.status_code)
+
+                        try:
+                            st.json(response.json())
+                        except:
+                            st.write(response.text)
+
+                except requests.exceptions.ConnectionError:
+                    st.error("Connection failed. Check internet/API.")
+
+                except requests.exceptions.Timeout:
+                    st.error("Request timed out.")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+# =====================================================
+# IMAGE GENERATOR
+# =====================================================
+
 if option == "Image Generator":
 
     st.header("🎨 AI Image Generator")
@@ -81,7 +125,6 @@ if option == "Image Generator":
                         timeout=120
                     )
 
-                    # Success
                     if response.status_code == 200:
 
                         image = Image.open(BytesIO(response.content))
@@ -104,10 +147,10 @@ if option == "Image Generator":
                             st.write(response.text)
 
                 except requests.exceptions.ConnectionError:
-                    st.error("Connection failed. Check internet or Hugging Face API.")
+                    st.error("Connection failed.")
 
                 except requests.exceptions.Timeout:
-                    st.error("Request timed out. Try again.")
+                    st.error("Request timed out.")
 
                 except Exception as e:
                     st.error(f"Error: {e}")
