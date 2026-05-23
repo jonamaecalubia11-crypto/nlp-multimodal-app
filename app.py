@@ -18,7 +18,7 @@ st.subheader("Chatbot + AI Image Generator")
 
 # Safe secret loading. Looks for HF_TOKEN inside your Streamlit Cloud Advanced Settings Secrets panel.
 if "API_TOKEN" in st.secrets:
-    API_TOKEN = st.secrets["HF_TOKEN"]
+    API_TOKEN = st.secrets["API_TOKEN"]
 else:
     # Fallback to the hardcoded token if the Secrets dashboard hasn't been set up yet
     API_TOKEN = "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"
