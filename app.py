@@ -8,7 +8,7 @@ from io import BytesIO
 st.set_page_config(page_title="NLP Multi-Modal AI App")
 
 # Hugging Face Token
-API_TOKEN = st.secrets["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"]
+API_TOKEN = st.secrets["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"]
 
 headers = {
     "Authorization": f"Bearer {API_TOKEN}"
