@@ -61,21 +61,53 @@ if option == "Image Generator":
 
     if st.button("Generate Image"):
 
-        payload = {
-            "inputs": prompt
-        }
-
-        response = requests.post(
-            IMAGE_API_URL,
-            headers=headers,
-            json=payload
-        )
-
-        if response.status_code == 200:
-
-            image = Image.open(BytesIO(response.content))
-
-            st.image(image, caption="Generated Image")
+        if prompt.strip() == "":
+            st.warning("Please enter a prompt")
 
         else:
-            st.error("Image generation failed")
+
+            with st.spinner("Generating image..."):
+
+                payload = {
+                    "inputs": prompt
+                }
+
+                try:
+
+                    response = requests.post(
+                        IMAGE_API_URL,
+                        headers=headers,
+                        json=payload,
+                        timeout=120
+                    )
+
+                    # Success
+                    if response.status_code == 200:
+
+                        image = Image.open(BytesIO(response.content))
+
+                        st.image(
+                            image,
+                            caption="Generated Image",
+                            use_container_width=True
+                        )
+
+                    else:
+
+                        st.error("Image generation failed")
+
+                        st.write("Status Code:", response.status_code)
+
+                        try:
+                            st.json(response.json())
+                        except:
+                            st.write(response.text)
+
+                except requests.exceptions.ConnectionError:
+                    st.error("Connection failed. Check internet or Hugging Face API.")
+
+                except requests.exceptions.Timeout:
+                    st.error("Request timed out. Try again.")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
