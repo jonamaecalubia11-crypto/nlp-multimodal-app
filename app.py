@@ -14,19 +14,20 @@ headers = {
     "Authorization": f"Bearer {API_TOKEN}"
 }
 
-# Streamlit page
-st.set_page_config(page_title="NLP Multi-Modal AI App")
+# ---------------- APP UI ----------------
 
 st.title("🤖 NLP Multi-Modal AI App")
-st.subheader("Chat + AI Image Generator")
+st.subheader("Chatbot + Image Generator")
 
-# Sidebar
 option = st.sidebar.selectbox(
     "Choose Feature",
     ["Chatbot", "Image Generator"]
 )
 
-# ---------------- CHATBOT ----------------
+# =====================================================
+# CHATBOT
+# =====================================================
+
 if option == "Chatbot":
 
     st.header("💬 AI Chatbot")
@@ -35,24 +36,62 @@ if option == "Chatbot":
 
     if st.button("Send"):
 
-        payload = {
-            "inputs": user_input
-        }
+        if user_input.strip() == "":
+            st.warning("Please enter a message")
 
-        response = requests.post(
-            CHAT_API_URL,
-            headers=headers,
-            json=payload
-        )
+        else:
 
-        result = response.json()
+            with st.spinner("Thinking..."):
 
-        try:
-            st.success(result["generated_text"])
-        except:
-            st.error("Error generating response")
+                payload = {
+                    "inputs": user_input
+                }
 
-# ---------------- IMAGE GENERATOR ----------------
+                try:
+
+                    response = requests.post(
+                        CHAT_API_URL,
+                        headers=headers,
+                        json=payload,
+                        timeout=60
+                    )
+
+                    if response.status_code == 200:
+
+                        result = response.json()
+
+                        # FLAN-T5 output
+                        if isinstance(result, list):
+                            generated_text = result[0]["generated_text"]
+                            st.success(generated_text)
+
+                        else:
+                            st.write(result)
+
+                    else:
+
+                        st.error("Chatbot request failed")
+
+                        st.write("Status Code:", response.status_code)
+
+                        try:
+                            st.json(response.json())
+                        except:
+                            st.write(response.text)
+
+                except requests.exceptions.ConnectionError:
+                    st.error("Connection failed. Check internet/API.")
+
+                except requests.exceptions.Timeout:
+                    st.error("Request timed out.")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
+
+# =====================================================
+# IMAGE GENERATOR
+# =====================================================
+
 if option == "Image Generator":
 
     st.header("🎨 AI Image Generator")
@@ -61,21 +100,55 @@ if option == "Image Generator":
 
     if st.button("Generate Image"):
 
-        payload = {
-            "inputs": prompt
-        }
+        if prompt.strip() == "":
+            st.warning("Please enter a prompt")
 
-        response = requests.post(
-            IMAGE_API_URL,
-            headers=headers,
-            json=payload
-        )
+        else:
 
-        if response.status_code == 200:
+            with st.spinner("Generating image..."):
 
-            image = Image.open(BytesIO(response.content))
+                payload = {
+                    "inputs": prompt
+                }
 
-            st.image(image, caption="Generated Image")
+                try:
+
+                    response = requests.post(
+                        IMAGE_API_URL,
+                        headers=headers,
+                        json=payload,
+                        timeout=120
+                    )
+
+                    if response.status_code == 200:
+
+                        image = Image.open(BytesIO(response.content))
+
+                        st.image(
+                            image,
+                            caption="Generated Image",
+                            use_container_width=True
+                        )
+
+                    else:
+
+                        st.error("Image generation failed")
+
+                        st.write("Status Code:", response.status_code)
+
+                        try:
+                            st.json(response.json())
+                        except:
+                            st.write(response.text)
+
+                except requests.exceptions.ConnectionError:
+                    st.error("Connection failed.")
+
+                except requests.exceptions.Timeout:
+                    st.error("Request timed out.")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
 
         else:
             st.error("Image generation failed")
