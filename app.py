@@ -16,7 +16,7 @@ st.subheader("Chatbot + AI Image Generator")
 # API SETTINGS
 # ======================================
 
-API_TOKEN = st.secrets["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"]
+API_TOKEN = st.secrets["API_TOKEN"]
 
 headers = {
     "Authorization": f"Bearer {API_TOKEN}"
