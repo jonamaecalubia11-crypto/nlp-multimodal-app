@@ -23,7 +23,7 @@ headers = {
     "Authorization": f"Bearer {API_TOKEN}"
 }
 
-CHAT_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-base"
+CHAT_API_URL = "https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill"
 IMAGE_API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
 
 # ======================================
